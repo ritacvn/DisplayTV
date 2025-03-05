@@ -34,3 +34,14 @@ TV Series App is an iOS application that allows users to browse, search, and sav
    ```
 3. Run the app on a simulator or a physical device.
 
+## ✅ Running Tests
+
+To run the unit tests, follow these steps:
+
+1. Open Xcode and select the DisplayTV scheme.
+
+2. Press Cmd + U to run all unit tests.
+
+3. Alternatively, open the Tests folder and manually run specific test cases.
+
+4. Check the Test Navigator (Cmd + 5) to view the test results.
