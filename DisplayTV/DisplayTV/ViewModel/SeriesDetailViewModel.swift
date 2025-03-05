@@ -5,12 +5,14 @@ class SeriesDetailViewModel: ObservableObject {
     @Published var episodes: [Int: [Episode]] = [:]
     @Published var showError = false
     @Published var errorMessage = ""
+    @Published var isFavorite: Bool
     
     private let service: TVSeriesService
     
     init(series: TVSeries, service: TVSeriesService) {
         self.series = series
         self.service = service
+        self.isFavorite = FavoritesManager.shared.getFavorites().contains(where: { $0.id == series.id })
     }
     
     func fetchEpisodes() {
@@ -24,6 +26,15 @@ class SeriesDetailViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    func toggleFavorite() {
+        if isFavorite {
+            FavoritesManager.shared.removeFavorite(series: series)
+        } else {
+            FavoritesManager.shared.saveFavorite(series: series)
+        }
+        isFavorite.toggle()
     }
     
     private func showError(with message: String) {

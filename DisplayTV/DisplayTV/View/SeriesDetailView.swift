@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SeriesDetailView: View {
     @StateObject var viewModel: SeriesDetailViewModel
+    @Binding var isFavorite: Bool
     
     var body: some View {
         ScrollView {
@@ -33,6 +34,22 @@ struct SeriesDetailView: View {
                 Text(viewModel.series.summary?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression) ?? "No summary available")
                     .font(.body)
                 
+                Button(action: {
+                    if isFavorite {
+                        FavoritesManager.shared.removeFavorite(series: viewModel.series)
+                    } else {
+                        FavoritesManager.shared.saveFavorite(series: viewModel.series)
+                    }
+                    isFavorite.toggle()
+                }) {
+                    HStack {
+                        Image(systemName: isFavorite ? "star.fill" : "star")
+                            .foregroundColor(.yellow)
+                        Text(isFavorite ? "Remove from Favorites" : "Add to Favorites")
+                    }
+                }
+                .padding()
+                
                 Text("Episodes by Season")
                     .font(.title2)
                     .bold()
@@ -51,6 +68,7 @@ struct SeriesDetailView: View {
         }
         .onAppear {
             viewModel.fetchEpisodes()
+            isFavorite = FavoritesManager.shared.getFavorites().contains(where: { $0.id == viewModel.series.id })
         }
     }
 }
