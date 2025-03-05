@@ -2,32 +2,35 @@ import Foundation
 
 class SeriesListViewModel: ObservableObject {
     @Published var series: [TVSeries] = []
+    @Published var showError = false
+    @Published var errorMessage = ""
+    
     private var currentPage = 0
     private var isLoading = false
+    private var lastRequest: (() -> Void)?
+    let service: TVSeriesService
+    
+    init(service: TVSeriesService) {
+        self.service = service
+    }
     
     func fetchTVSeries() {
         guard !isLoading else { return }
         isLoading = true
+        lastRequest = { self.fetchTVSeries() }
         
-        let urlString = "https://api.tvmaze.com/shows?page=\(currentPage)"
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        service.fetchTVSeries(page: currentPage) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
-            }
-            if let data = data {
-                do {
-                    let decodedResponse = try JSONDecoder().decode([TVSeries].self, from: data)
-                    DispatchQueue.main.async {
-                        self.series.append(contentsOf: decodedResponse)
-                        self.currentPage += 1
-                    }
-                } catch {
-                    print("Error decoding JSON: \(error)")
+                switch result {
+                case .success(let shows):
+                    self.series.append(contentsOf: shows)
+                    self.currentPage += 1
+                case .failure(let error):
+                    self.showError(with: error.localizedDescription)
                 }
             }
-        }.resume()
+        }
     }
     
     func fetchNextPage() {
@@ -42,20 +45,28 @@ class SeriesListViewModel: ObservableObject {
             return
         }
         
-        let urlString = "https://api.tvmaze.com/search/shows?q=\(query)"
-        guard let url = URL(string: urlString) else { return }
+        lastRequest = { self.searchSeries(query: query) }
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                do {
-                    let decodedResponse = try JSONDecoder().decode([SearchResult].self, from: data)
-                    DispatchQueue.main.async {
-                        self.series = decodedResponse.map { $0.show }
-                    }
-                } catch {
-                    print("Error decoding JSON: \(error)")
+        service.searchSeries(query: query) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let shows):
+                    self.series = shows
+                case .failure(let error):
+                    self.showError(with: error.localizedDescription)
                 }
             }
-        }.resume()
+        }
+    }
+    
+    private func showError(with message: String) {
+        DispatchQueue.main.async {
+            self.errorMessage = message
+            self.showError = true
+        }
+    }
+    
+    func retryLastRequest() {
+        lastRequest?()
     }
 }

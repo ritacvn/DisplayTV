@@ -9,7 +9,7 @@ struct SeriesListView: View {
             VStack {
                 SearchBar(text: $searchText)
                 List(viewModel.series) { show in
-                    NavigationLink(destination: SeriesDetailView(viewModel: SeriesDetailViewModel(series: show))) {
+                    NavigationLink(destination: SeriesDetailView(viewModel: SeriesDetailViewModel(series: show, service: viewModel.service))) {
                         HStack {
                             AsyncImage(url: URL(string: show.image?.medium ?? "")) { image in
                                 image.resizable()
@@ -21,11 +21,6 @@ struct SeriesListView: View {
                             
                             Text(show.name)
                                 .font(.headline)
-                        }
-                    }
-                    .onAppear {
-                        if show == viewModel.series.last {
-                            viewModel.fetchNextPage()
                         }
                     }
                 }

@@ -3,26 +3,33 @@ import Foundation
 class SeriesDetailViewModel: ObservableObject {
     @Published var series: TVSeries
     @Published var episodes: [Int: [Episode]] = [:]
+    @Published var showError = false
+    @Published var errorMessage = ""
     
-    init(series: TVSeries) {
+    private let service: TVSeriesService
+    
+    init(series: TVSeries, service: TVSeriesService) {
         self.series = series
+        self.service = service
     }
     
     func fetchEpisodes() {
-        let urlString = "https://api.tvmaze.com/shows/\(series.id)/episodes"
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                do {
-                    let decodedEpisodes = try JSONDecoder().decode([Episode].self, from: data)
-                    DispatchQueue.main.async {
-                        self.episodes = Dictionary(grouping: decodedEpisodes, by: { $0.season })
-                    }
-                } catch {
-                    print("Error decoding episodes: \(error)")
+        service.fetchEpisodes(showID: series.id) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let episodes):
+                    self.episodes = Dictionary(grouping: episodes, by: { $0.season })
+                case .failure(let error):
+                    self.showError(with: error.localizedDescription)
                 }
             }
-        }.resume()
+        }
+    }
+    
+    private func showError(with message: String) {
+        DispatchQueue.main.async {
+            self.errorMessage = message
+            self.showError = true
+        }
     }
 }

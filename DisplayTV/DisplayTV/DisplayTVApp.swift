@@ -4,7 +4,7 @@ import SwiftUI
 struct DisplayTVApp: App {
     var body: some Scene {
         WindowGroup {
-            SeriesListView(viewModel: SeriesListViewModel())
+            SeriesListView(viewModel: SeriesListViewModel(service: TVSeriesService()))
         }
     }
 }
