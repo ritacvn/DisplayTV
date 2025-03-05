@@ -1,10 +1,3 @@
-//
-//  SeriesEndpoints.swift
-//  DisplayTV
-//
-//  Created by Rita Vasconcelos on 04/03/25.
-//
-
 import Foundation
 
 struct SeriesEndpoints {

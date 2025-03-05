@@ -1,10 +1,3 @@
-//
-//  FavoritesManager.swift
-//  DisplayTV
-//
-//  Created by Rita Vasconcelos on 05/03/25.
-//
-
 import SwiftUI
 
 class FavoritesManager {

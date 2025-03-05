@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SeriesDetailView: View {
     @StateObject var viewModel: SeriesDetailViewModel
-    @Binding var isFavorite: Bool
     
     var body: some View {
         ScrollView {
@@ -35,17 +34,12 @@ struct SeriesDetailView: View {
                     .font(.body)
                 
                 Button(action: {
-                    if isFavorite {
-                        FavoritesManager.shared.removeFavorite(series: viewModel.series)
-                    } else {
-                        FavoritesManager.shared.saveFavorite(series: viewModel.series)
-                    }
-                    isFavorite.toggle()
+                    viewModel.toggleFavorite()
                 }) {
                     HStack {
-                        Image(systemName: isFavorite ? "star.fill" : "star")
+                        Image(systemName: viewModel.isFavorite ? "star.fill" : "star")
                             .foregroundColor(.yellow)
-                        Text(isFavorite ? "Remove from Favorites" : "Add to Favorites")
+                        Text(viewModel.isFavorite ? "Remove from Favorites" : "Add to Favorites")
                     }
                 }
                 .padding()
@@ -55,11 +49,34 @@ struct SeriesDetailView: View {
                     .bold()
                 
                 ForEach(viewModel.episodes.keys.sorted(), id: \ .self) { season in
-                    Section(header: Text("Season \(season)")) {
-                        ForEach(viewModel.episodes[season] ?? [], id: \ .id) { episode in
-                            NavigationLink(destination: EpisodeDetailView(episode: episode)) {
-                                Text(episode.name)
+                    VStack(alignment: .leading) {
+                        Text("Season \(season)")
+                            .font(.headline)
+                            .padding(.top, 10)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 16) {
+                                ForEach(viewModel.episodes[season] ?? [], id: \ .id) { episode in
+                                    NavigationLink(destination: EpisodeDetailView(episode: episode)) {
+                                        VStack {
+                                            AsyncImage(url: URL(string: episode.image?.medium ?? "")) { image in
+                                                image.resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 120, height: 160)
+                                                    .cornerRadius(8)
+                                            } placeholder: {
+                                                Color.gray.frame(width: 120, height: 160).cornerRadius(8)
+                                            }
+                                            
+                                            Text(episode.name)
+                                                .font(.caption)
+                                                .frame(width: 120)
+                                                .multilineTextAlignment(.center)
+                                        }
+                                    }
+                                }
                             }
+                            .padding(.horizontal)
                         }
                     }
                 }
@@ -68,7 +85,6 @@ struct SeriesDetailView: View {
         }
         .onAppear {
             viewModel.fetchEpisodes()
-            isFavorite = FavoritesManager.shared.getFavorites().contains(where: { $0.id == viewModel.series.id })
         }
     }
 }

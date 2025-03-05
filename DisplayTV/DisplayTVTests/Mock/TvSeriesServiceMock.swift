@@ -1,7 +1,6 @@
 import XCTest
 @testable import DisplayTV
 
-// MARK: - Mock TVMazeService
 class TvSeriesServiceMock: TVSeriesService {
     var shouldReturnError = false
     var mockSeries: [TVSeries] = []

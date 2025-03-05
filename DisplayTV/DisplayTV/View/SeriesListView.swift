@@ -10,7 +10,7 @@ struct SeriesListView: View {
             VStack {
                 SearchBar(text: $searchText)
                 List(viewModel.series) { show in
-                    NavigationLink(destination: SeriesDetailView(viewModel: SeriesDetailViewModel(series: show, service: viewModel.service), isFavorite: $needsUpdate)) {
+                    NavigationLink(destination: SeriesDetailView(viewModel: SeriesDetailViewModel(series: show, service: TVSeriesService()))) {
                         HStack {
                             AsyncImage(url: URL(string: show.image?.medium ?? "")) { image in
                                 image.resizable()
