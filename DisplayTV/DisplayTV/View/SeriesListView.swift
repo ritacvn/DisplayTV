@@ -9,17 +9,19 @@ struct SeriesListView: View {
             VStack {
                 SearchBar(text: $searchText)
                 List(viewModel.series) { show in
-                    HStack {
-                        AsyncImage(url: URL(string: show.image?.medium ?? "")) { image in
-                            image.resizable()
-                        } placeholder: {
-                            ProgressView()
+                    NavigationLink(destination: SeriesDetailView(viewModel: SeriesDetailViewModel(series: show))) {
+                        HStack {
+                            AsyncImage(url: URL(string: show.image?.medium ?? "")) { image in
+                                image.resizable()
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 80, height: 120)
+                            .cornerRadius(8)
+                            
+                            Text(show.name)
+                                .font(.headline)
                         }
-                        .frame(width: 80, height: 120)
-                        .cornerRadius(8)
-                        
-                        Text(show.name)
-                            .font(.headline)
                     }
                     .onAppear {
                         if show == viewModel.series.last {
