@@ -40,7 +40,9 @@ struct SeriesDetailView: View {
                 ForEach(viewModel.episodes.keys.sorted(), id: \ .self) { season in
                     Section(header: Text("Season \(season)")) {
                         ForEach(viewModel.episodes[season] ?? [], id: \ .id) { episode in
-                            Text(episode.name)
+                            NavigationLink(destination: EpisodeDetailView(episode: episode)) {
+                                Text(episode.name)
+                            }
                         }
                     }
                 }
